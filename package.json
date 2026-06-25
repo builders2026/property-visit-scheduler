@@ -1,9 +1,9 @@
 {
   "name": "property-visit-scheduler",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
+    "firebase": "^10.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1"
