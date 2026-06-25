@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import Chatbot from './pages/Chatbot';
-import AdminPanel from './pages/AdminPanel';
-import VisitsList from './pages/VisitsList';
+import MasterAdmin from './pages/MasterAdmin';
+import BuilderDashboard from './pages/BuilderDashboard';
+import VisitorBooking from './pages/VisitorBooking';
+import Login from './pages/Login';
 
 const styles = {
   app: {
@@ -19,43 +20,45 @@ const styles = {
     justifyContent: 'space-between',
     height: '64px',
   },
-  logo: {
+  logo: { color: '#e2b96f', fontSize: '20px', fontWeight: '700' },
+  logoSub: { color: 'rgba(255,255,255,0.4)', fontSize: '11px', display: 'block' },
+  navRight: { display: 'flex', alignItems: 'center', gap: '12px' },
+  roleTag: {
+    background: 'rgba(226,185,111,0.2)',
     color: '#e2b96f',
-    fontSize: '20px',
-    fontWeight: '700',
-    letterSpacing: '-0.5px',
-  },
-  logoSub: {
-    color: 'rgba(255,255,255,0.5)',
+    padding: '4px 12px',
+    borderRadius: '20px',
     fontSize: '12px',
-    fontWeight: '400',
-    display: 'block',
-    letterSpacing: '0.5px',
+    fontWeight: '600',
   },
-  navLinks: {
-    display: 'flex',
-    gap: '8px',
+  logoutBtn: {
+    background: 'rgba(231,76,60,0.2)',
+    color: '#e74c3c',
+    border: '1px solid #e74c3c',
+    borderRadius: '8px',
+    padding: '6px 14px',
+    cursor: 'pointer',
+    fontSize: '13px',
   },
+  content: { padding: '32px 16px', maxWidth: '1000px', margin: '0 auto' },
+  navLinks: { display: 'flex', gap: '8px' },
   navBtn: (active) => ({
     padding: '8px 16px',
     borderRadius: '8px',
     border: 'none',
     cursor: 'pointer',
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '500',
-    transition: 'all 0.2s',
     background: active ? '#e2b96f' : 'transparent',
     color: active ? '#1a1a2e' : 'rgba(255,255,255,0.7)',
   }),
-  content: {
-    padding: '32px 16px',
-    maxWidth: '900px',
-    margin: '0 auto',
-  },
 };
 
 export default function App() {
+  const [user, setUser] = useState(null); // { role: 'master'|'builder', data: {...} }
   const [page, setPage] = useState('book');
+
+  const logout = () => { setUser(null); setPage('book'); };
 
   return (
     <div style={styles.app}>
@@ -64,22 +67,35 @@ export default function App() {
           <span style={styles.logo}>🏢 PropVisit</span>
           <span style={styles.logoSub}>Property Visit Scheduler</span>
         </div>
+
         <div style={styles.navLinks}>
-          <button style={styles.navBtn(page === 'book')} onClick={() => setPage('book')}>
-            📅 Book Visit
-          </button>
-          <button style={styles.navBtn(page === 'visits')} onClick={() => setPage('visits')}>
-            📋 My Visits
-          </button>
-          <button style={styles.navBtn(page === 'admin')} onClick={() => setPage('admin')}>
-            🔐 Admin
-          </button>
+          <button style={styles.navBtn(page === 'book')} onClick={() => setPage('book')}>📅 Book Visit</button>
+          {!user && <button style={styles.navBtn(page === 'login')} onClick={() => setPage('login')}>🔐 Login</button>}
+          {user?.role === 'master' && (
+            <button style={styles.navBtn(page === 'master')} onClick={() => setPage('master')}>⚙️ Master Admin</button>
+          )}
+          {user?.role === 'builder' && (
+            <button style={styles.navBtn(page === 'builder')} onClick={() => setPage('builder')}>📊 My Dashboard</button>
+          )}
+        </div>
+
+        <div style={styles.navRight}>
+          {user && (
+            <>
+              <span style={styles.roleTag}>
+                {user.role === 'master' ? '👑 Master Admin' : `🏗️ ${user.data.name}`}
+              </span>
+              <button style={styles.logoutBtn} onClick={logout}>Logout</button>
+            </>
+          )}
         </div>
       </nav>
+
       <div style={styles.content}>
-        {page === 'book' && <Chatbot />}
-        {page === 'visits' && <VisitsList />}
-        {page === 'admin' && <AdminPanel />}
+        {page === 'book' && <VisitorBooking />}
+        {page === 'login' && !user && <Login onLogin={(u) => { setUser(u); setPage(u.role === 'master' ? 'master' : 'builder'); }} />}
+        {page === 'master' && user?.role === 'master' && <MasterAdmin />}
+        {page === 'builder' && user?.role === 'builder' && <BuilderDashboard builder={user.data} />}
       </div>
     </div>
   );
